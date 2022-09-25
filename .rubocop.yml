@@ -12,3 +12,9 @@ Style/StringLiteralsInInterpolation:
 
 Layout/LineLength:
   Max: 120
+
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
+
+Metrics/BlockLength:
+  Enabled: false

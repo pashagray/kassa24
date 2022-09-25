@@ -8,32 +8,13 @@ RSpec.describe Kassa24::Payment::Create do
     let(:authorization) { Base64.encode64("#{login}:#{password}").strip }
 
     before do
-      stub_request(:post, endpoint)
-        .with(
-          body: "{\"amount\":10000,\"merchantId\":\"bad_login\"}",
-          headers: {
-            "Accept" => "*/*",
-            "Authorization" => "Basic YmFkX2xvZ2luOmJhZF9wYXNzd29yZA=="
-          }
-        ).to_return(status: 401, body: File.read("spec/fixtures/payment/create/401.json"), headers: {})
-
-      stub_request(:post, endpoint)
-        .with(
-          body: "{\"amount\":0,\"merchantId\":\"13812990844141623\"}",
-          headers: {
-            "Accept" => "*/*",
-            "Authorization" => "Basic #{authorization}"
-          }
-        ).to_return(status: 400, body: File.read("spec/fixtures/payment/create/400.txt"), headers: {})
-
-      stub_request(:post, endpoint)
-        .with(
-          body: { "{\"amount\":10000,\"merchantId\":\"13812990844141623\"}" => nil },
-          headers: {
-            "Accept" => "*/*",
-            "Authorization" => "Basic #{authorization}"
-          }
-        ).to_return(status: 200, body: File.read("spec/fixtures/payment/create/200.json"), headers: {})
+      if ENV["ENABLE_REAL_REQUESTS"]
+        WebMock.allow_net_connect!
+      else
+        stub_payment_create_200
+        stub_payment_create_400
+        stub_payment_create_401
+      end
     end
 
     context "with not all required fields provided" do
@@ -92,12 +73,8 @@ RSpec.describe Kassa24::Payment::Create do
         end
 
         it "returns payment_id" do
-          expect(result.value).to eq(
-            {
-              id: "13812990844141623_1",
-              url: "https://ecommerce.pult24.kz/payment/13812990844141623_1"
-            }
-          )
+          expect(result.value[:id]).to be_a(String)
+          expect(result.value[:url]).to be_a(String)
         end
       end
     end
