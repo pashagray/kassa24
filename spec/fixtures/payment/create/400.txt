@@ -1,0 +1,1 @@
+{"error":"Error validating request: Field "amount" is required and should be larger than 0"}
