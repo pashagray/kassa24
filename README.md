@@ -9,7 +9,7 @@ TODO: Delete this and the text above, and describe your gem
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'kassa24'
+gem "kassa24"
 ```
 
 And then execute:
@@ -22,7 +22,39 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Create payment
+
+```ruby
+  payment_service = Kassa24::Payment.Create.new
+  result = payment_service.call(
+    login: "xxx",
+    password: "xxx",
+    amount: 100_00,
+    description: "Payment for order #123",
+    customer_data: {
+      phone: "+77000000000"
+    }
+  )
+
+  if result.success?
+    result.value[:url] #=> https://kassa24.kz/pay/xxx
+  else
+    result.error #=> [:bad_credentials, {}]
+  end
+```
+
+### Callback
+
+```ruby
+# E.g. Rails Controller
+
+class Kassa24
+  def callback
+    callback_service = Kassa24::Callback.new
+    callback_service.call(id: request.remote_ip, **params)
+  end
+end
+```
 
 ## Development
 
